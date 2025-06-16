@@ -51,3 +51,33 @@ Then open:
 
 - http://127.0.0.1:8000/docs for the API `Swagger UI`  
 - http://127.0.0.1:8000/ for the simple `browser UI`
+
+
+## Usage
+
+You can test the summarization service in **two ways**:
+
+### 1. API (via Postman, cURL, etc.)
+
+Make a `POST` request to `/summarize` with a JSON payload:
+
+```bash
+curl -X POST http://127.0.0.1:8000/summarize \
+  -H "Content-Type: application/json" \
+  -d '{"query":"Tell me the history of Agentic AI"}'
+```
+
+
+### 2. Live Browser UI
+For a more interactive experience, use the built-in web interface:
+
+**Step 1: Start the app**
+
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+**Step 2: Open your browser and navigate to**
+   
+   ```bash
+   http://127.0.0.1:8000/
+   ```
