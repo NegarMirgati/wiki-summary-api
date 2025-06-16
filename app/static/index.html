@@ -1,23 +1,22 @@
-<!-- app/static/index.html -->
 <!DOCTYPE html>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <html>
-<head>
+  <head>
     <title>Wiki Summary</title>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Wiki Summary API</h1>
-    <form method="post" action="/ui/summarize">
-        <label for="query">Enter your query:</label><br>
-        <input type="text" id="query" name="query" size="60" required><br><br>
-        <button type="submit">Summarize</button>
+    <form id="query-form">
+      <label for="query">Enter your query:</label><br />
+      <input type="text" id="query" name="query" size="60" required /><br /><br />
+      <button type="submit">Summarize</button>
     </form>
 
-    {% if summary %}
-    <hr>
+    <hr />
     <h2>Summary:</h2>
-    <p><strong>Query:</strong> {{ query }}</p>
-    <p>{{ summary }}</p>
-    <p><a href="{{ url }}" target="_blank">Source</a></p>
-    {% endif %}
-</body>
+    <div id="output" style="white-space: pre-wrap;"></div>
+    <div id="source" style="margin-top: 1em;"></div>
+
+    <script src="/static/script.js"></script>
+  </body>
 </html>

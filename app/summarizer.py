@@ -11,62 +11,43 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # fallback default
 
+client = openai.OpenAI()  # Automatically picks up OPENAI_API_KEY from env
 
-def summarize_with_gpt(text: str, max_words: int = 300) -> str:
-    if not openai.api_key:
-        raise ValueError("OPENAI_API_KEY is not set.")
 
-    system_message = system_message = "You are a helpful assistant that"
-    system_message += "summarizes Wikipedia articles in a clear, concise way"
-    system_message += "Always be accurate. Make sure to not hallucinate."
-    system_message += "Only make use of information that is given to you in the prompt."
+def summarize_with_gpt(text: str, max_words: int = 300, stream: bool = False):
+    """
+    Use OpenAI's GPT model to summarize a given text.
 
-    prompt = (
-        "Summarize the following Wikipedia article content in a clear, concise way"
-        f"in under {max_words} words:\n\n{text}"
+    If stream=True, return a generator yielding delta chunks.
+    Otherwise, return the full summary string.
+    """
+    system_message = (
+        "You are a helpful assistant that summarizes Wikipedia articles in a clear, "
+        "coherent, and concise way. Always be accurate. Do not hallucinate. "
+        "Only use information provided in the prompt."
     )
 
+    prompt = f"Summarize the following Wikipedia article content in under {max_words} words:\n\n{text}"
 
-# app/summarizer.py
+    messages = [
+        {"role": "system", "content": system_message},
+        {"role": "user", "content": prompt},
+    ]
 
-import os
-from dotenv import load_dotenv
-import openai
-
-# Load environment variables from .env
-load_dotenv()
-
-# Get API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")  # fallback default
-
-
-def summarize_with_gpt(text: str, max_words: int = 300) -> str:
-    if not openai.api_key:
-        raise ValueError("OPENAI_API_KEY is not set.")
-
-    system_message = system_message = "You are a helpful assistant that "
-    system_message += (
-        "summarizes Wikipedia articles in a clear, coherent, and concise way."
-    )
-    system_message += "Always be accurate. Make sure to not hallucinate."
-    system_message += "Only make use of information that is given to you in the prompt."
-
-    prompt = (
-        "Summarize the following Wikipedia article content in a clear, concise way"
-        f"in under {max_words} words:\n\n{text}"
-    )
-
-    response = openai.chat.completions.create(
-        model=OPENAI_MODEL,
-        messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.7,
-    )
-
-    return response.choices[0].message.content.strip()
+    if stream:
+        # Return the raw generator for the caller to handle chunking
+        return client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4"),
+            messages=messages,
+            temperature=0.7,
+            stream=True,
+        )
+    else:
+        # Return a single response string
+        response = client.chat.completions.create(
+            model=os.getenv("OPENAI_MODEL", "gpt-4"), messages=messages, temperature=0.7
+        )
+        return response.choices[0].message.content.strip()
 
 
 def extract_topic_with_llm(query: str) -> str:
